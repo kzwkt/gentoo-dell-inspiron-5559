@@ -11,7 +11,10 @@ mkdir -p "$src"
 tar -xf kernel.tar.xz -C "$src" --strip-components=1
 cp .config "$src/.config"
 
+# CONFIG_EXTRA_FIRMWARE_DIR="fw" is relative to $(srctree), so the blobs have to
+# live inside the source tree for drivers/base/firmware_loader/builtin.
+mkdir -p "$src/fw"
+cp -a fw/. "$src/fw/"
+
 make -C "$src" olddefconfig
 make -C "$src" -j"$(nproc)" KCFLAGS="-march=skylake -pipe" bzImage
-
-tar -cJf firmware.tar.xz -C fw .
