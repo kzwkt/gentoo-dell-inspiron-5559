@@ -1,0 +1,44 @@
+name: Build kernel
+
+on:
+  push:
+    paths:
+      - "ver"
+      - ".config"
+      - "build.sh"
+      - "fw/**"
+      - ".github/workflows/kbuild.yml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            bison flex libncurses-dev libssl-dev libelf-dev bc zstd xz-utils
+
+      - name: Download and build kernel
+        run: bash build.sh
+
+      - name: Read kernel version
+        id: meta
+        run: echo "version=$(head -n1 ver)" >> "$GITHUB_OUTPUT"
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.meta.outputs.version }}
+          name: "Kernel ${{ steps.meta.outputs.version }}"
+          body: "Stable kernel ${{ steps.meta.outputs.version }} built for the Dell Inspiron 5559, plus the firmware blobs in fw/."
+          files: |
+            kext/arch/x86/boot/bzImage
+            firmware.tar.xz
