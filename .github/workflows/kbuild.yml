@@ -41,3 +41,4 @@ jobs:
           body: "Stable kernel ${{ steps.meta.outputs.version }} for the Dell Inspiron 5559; the blobs in fw/ are embedded via CONFIG_EXTRA_FIRMWARE."
           files: |
             kext/arch/x86/boot/bzImage
+            kext/.config
